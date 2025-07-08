@@ -1,0 +1,401 @@
+<!-- backend/public/admin.html -->
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Admin - Gestión de Productos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fafafa;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+
+        form {
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .product-list {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 0 10px #ccc;
+            padding: 15px;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-actions button {
+            margin-left: 5px;
+            background: #dc3545;
+        }
+
+        .product-actions button.edit {
+            background: #007bff;
+        }
+
+        .product-actions button:hover {
+            opacity: 0.8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Panel de Administración</h1>
+
+    <div id="login-section">
+        <form id="login-form">
+            <h2>Iniciar sesión</h2>
+            <label>Email:
+                <input type="email" id="login-email" required />
+            </label>
+            <label>Contraseña:
+                <input type="password" id="login-password" required />
+            </label>
+            <button type="submit">Entrar</button>
+            <p class="error" id="login-error"></p>
+        </form>
+    </div>
+
+    <div id="admin-section" class="hidden">
+        <button id="logout-btn" style="float:right; margin-bottom: 10px;">Cerrar sesión</button>
+
+        <form id="product-form">
+            <h2 id="form-title">Agregar producto</h2>
+            <input type="hidden" id="product-id" />
+            <label>Nombre:
+                <input type="text" id="product-name" required />
+            </label>
+            <label>Descripción:
+                <textarea id="product-description" rows="3" required></textarea>
+            </label>
+            <label>Precio:
+                <input type="number" step="0.01" id="product-price" required />
+            </label>
+            <label>Imagen:
+                <input type="file" id="product-image" accept="image/*" />
+            </label>
+            <label>Categoría:
+                <input type="text" id="product-category" required />
+            </label>
+            <button type="submit">Guardar</button>
+            <p class="error" id="product-error"></p>
+        </form>
+
+        <div class="product-list" id="product-list">
+            <h2>Productos</h2>
+            <div id="products-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiBase = 'http://localhost:3001/api';
+
+        const loginSection = document.getElementById('login-section');
+        const adminSection = document.getElementById('admin-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        const productForm = document.getElementById('product-form');
+        const productIdInput = document.getElementById('product-id');
+        const productNameInput = document.getElementById('product-name');
+        const productDescInput = document.getElementById('product-description');
+        const productPriceInput = document.getElementById('product-price');
+        const productCategoryInput = document.getElementById('product-category');
+        const productError = document.getElementById('product-error');
+        const productsContainer = document.getElementById('products-container');
+        const formTitle = document.getElementById('form-title');
+
+        let token = localStorage.getItem('token');
+
+        function setAuthHeader(headers = {}) {
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+            return headers;
+        }
+
+        function showLogin() {
+            loginSection.classList.remove('hidden');
+            adminSection.classList.add('hidden');
+            loginError.textContent = '';
+        }
+
+        function showAdmin() {
+            loginSection.classList.add('hidden');
+            adminSection.classList.remove('hidden');
+            productError.textContent = '';
+            loadProducts();
+        }
+
+        // Check token on load
+        if (token) {
+            showAdmin();
+        } else {
+            showLogin();
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.textContent = '';
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            try {
+                const res = await fetch(apiBase + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    loginError.textContent = data.error || 'Error al iniciar sesión';
+                    return;
+                }
+
+                token = data.token;
+                localStorage.setItem('token', token);
+                showAdmin();
+            } catch (err) {
+                loginError.textContent = 'Error en la conexión';
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            token = null;
+            localStorage.removeItem('token');
+            showLogin();
+        });
+
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            productError.textContent = '';
+
+            const id = productIdInput.value;
+
+            const fileInput = document.getElementById('product-image'); // Asegurate que el input exista en el HTML
+
+            const formData = new FormData();
+            formData.append('name', productNameInput.value.trim());
+            formData.append('description', productDescInput.value.trim());
+            formData.append('price', parseFloat(productPriceInput.value));
+            formData.append('category', productCategoryInput.value.trim());
+
+            if (fileInput.files[0]) {
+                formData.append('image', fileInput.files[0]);
+            }
+
+            try {
+                let res;
+                if (id) {
+                    // Update
+                    res = await fetch(apiBase + '/products/' + id, {
+                        method: 'PUT',
+                        headers: setAuthHeader(), // NO Content-Type
+                        body: formData
+                    });
+                } else {
+                    // Create
+                    res = await fetch(apiBase + '/products', {
+                        method: 'POST',
+                        headers: setAuthHeader(), // NO Content-Type
+                        body: formData
+                    });
+                }
+
+                const data = await res.json();
+                if (!res.ok) {
+                    productError.textContent = data.error || 'Error al guardar producto';
+                    return;
+                }
+
+                resetForm();
+                loadProducts();
+            } catch (err) {
+                productError.textContent = 'Error en la conexión';
+            }
+        });
+
+
+        function resetForm() {
+            productIdInput.value = '';
+            productNameInput.value = '';
+            productDescInput.value = '';
+            productPriceInput.value = '';
+            productCategoryInput.value = '';
+            formTitle.textContent = 'Agregar producto';
+            productError.textContent = '';
+        }
+
+        async function loadProducts() {
+            productsContainer.innerHTML = 'Cargando...';
+
+            try {
+                const res = await fetch(apiBase + '/products', {
+                    headers: setAuthHeader()
+                });
+                const products = await res.json();
+
+                if (!res.ok) {
+                    productsContainer.textContent = 'Error al cargar productos';
+                    return;
+                }
+
+                if (products.length === 0) {
+                    productsContainer.textContent = 'No hay productos cargados';
+                    return;
+                }
+
+                productsContainer.innerHTML = '';
+
+                products.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+
+                    div.innerHTML = `
+  <div class="product-info">
+    <strong>${product.name}</strong> - ${product.category} - $${product.price.toFixed(2)}<br/>
+    <small>${product.description}</small><br/>
+    ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}" style="max-width: 150px; margin-top: 8px;" />` : ''}
+  </div>
+  <div class="product-actions">
+    <button class="edit" data-id="${product.id}">Editar</button>
+    <button class="delete" data-id="${product.id}">Borrar</button>
+  </div>
+`;
+
+
+                    productsContainer.appendChild(div);
+                });
+
+                // Add event listeners for edit and delete
+                document.querySelectorAll('.edit').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-id');
+                        editProduct(id);
+                    });
+                });
+                document.querySelectorAll('.delete').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.getAttribute('data-id');
+                        deleteProduct(id);
+                    });
+                });
+
+            } catch (err) {
+                productsContainer.textContent = 'Error en la conexión';
+            }
+        }
+
+        async function editProduct(id) {
+            productError.textContent = '';
+            try {
+                const res = await fetch(apiBase + '/products', {
+                    headers: setAuthHeader()
+                });
+                const products = await res.json();
+
+                if (!res.ok) {
+                    productError.textContent = 'No se pudo cargar el producto';
+                    return;
+                }
+
+                const product = products.find(p => p.id == id);
+                if (!product) {
+                    productError.textContent = 'Producto no encontrado';
+                    return;
+                }
+
+                productIdInput.value = product.id;
+                productNameInput.value = product.name;
+                productDescInput.value = product.description;
+                productPriceInput.value = product.price;
+                productCategoryInput.value = product.category;
+                formTitle.textContent = 'Editar producto';
+            } catch (err) {
+                productError.textContent = 'Error en la conexión';
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('¿Querés borrar este producto?')) return;
+            productError.textContent = '';
+            try {
+                const res = await fetch(apiBase + '/products/' + id, {
+                    method: 'DELETE',
+                    headers: setAuthHeader()
+                });
+                if (!res.ok) {
+                    const data = await res.json();
+                    productError.textContent = data.error || 'Error al borrar producto';
+                    return;
+                }
+                loadProducts();
+            } catch (err) {
+                productError.textContent = 'Error en la conexión';
+            }
+        }
+    </script>
+</body>
+
+</html>
