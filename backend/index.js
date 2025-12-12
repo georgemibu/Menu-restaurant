@@ -8,6 +8,20 @@ const publicRoutes = require('./routes/public');
 const app = express();
 app.use(cors());
 
+// Configurar Content-Security-Policy para permitir recursos propios (incluyendo favicon)
+app.use((req, res, next) => {
+  // Solo aplicar CSP si no es el favicon
+  if (req.path === '/favicon.ico') {
+    return next();
+  }
+  // Para otras rutas, permitir recursos del mismo origen
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://api.qrserver.com; style-src 'self' 'unsafe-inline';"
+  );
+  next();
+});
+
 const path = require('path');
 
 // Middlewares para parsing (excepto multipart/form-data que lo maneja multer)
