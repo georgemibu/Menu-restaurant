@@ -30,12 +30,14 @@ app.use('/menu', require('./routes/menu'));
 
 // Usar el puerto que Render asigna automáticamente, o 3001 por defecto
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0'; // Escuchar en todas las interfaces para Render
 
 // Sincronizar modelos con la base de datos (solo crea tablas si no existen)
 // NO usar { force: true } ni { alter: true } en producción para evitar pérdida de datos
 sequelize.sync().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  app.listen(PORT, HOST, () => {
+    console.log(`Servidor corriendo en http://${HOST}:${PORT}`);
+    console.log(`Puerto: ${PORT}`);
   });
 }).catch(err => {
   console.error('Error al sincronizar la base de datos:', err);
