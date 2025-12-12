@@ -5,87 +5,193 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin - Gestión de Productos</title>
+    <title>Admin - Gestión de Menú</title>
+    <!-- QR Code: Usaremos API pública como fallback -->
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 20px auto;
-            background: #fafafa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
         }
 
         h1 {
             text-align: center;
-            color: #222;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
         }
 
         form {
-            margin-bottom: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 6px;
-            box-shadow: 0 0 10px #ccc;
+            display: grid;
+            gap: 15px;
         }
 
         label {
             display: block;
-            margin-top: 10px;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 5px;
         }
 
         input,
         textarea,
         select {
             width: 100%;
-            padding: 8px;
-            margin-top: 4px;
-            box-sizing: border-box;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         button {
-            margin-top: 15px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             cursor: pointer;
-            background: #28a745;
-            color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        button:hover {
-            background: #218838;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
 
-        .product-list {
-            background: white;
-            border-radius: 6px;
-            box-shadow: 0 0 10px #ccc;
-            padding: 15px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .product-item {
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2980b9;
+        }
+
+        .btn-logout {
+            background: #95a5a6;
+            color: white;
+            float: right;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 1.5em;
+            color: #27ae60;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .product-description {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .product-actions {
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .product-info {
-            flex: 1;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         .product-actions button {
-            margin-left: 5px;
-            background: #dc3545;
-        }
-
-        .product-actions button.edit {
-            background: #007bff;
-        }
-
-        .product-actions button:hover {
-            opacity: 0.8;
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
         }
 
         .hidden {
@@ -93,65 +199,307 @@
         }
 
         .error {
-            color: red;
+            color: #e74c3c;
             margin-top: 10px;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .success {
+            color: #27ae60;
+            margin-top: 10px;
+            padding: 10px;
+            background: #eafaf1;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .login-card {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state::before {
+            content: "📋";
+            font-size: 4em;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 
 <body>
-    <h1>Panel de Administración</h1>
+    <div class="container">
+        <h1>🍽️ Gestión de Menú</h1>
 
     <div id="login-section">
+            <div class="card login-card">
         <form id="login-form">
-            <h2>Iniciar sesión</h2>
+                    <h2>Iniciar Sesión</h2>
             <label>Email:
-                <input type="email" id="login-email" required />
+                        <input type="email" id="login-email" required placeholder="tu@email.com" />
             </label>
             <label>Contraseña:
-                <input type="password" id="login-password" required />
+                        <input type="password" id="login-password" required placeholder="••••••••" />
             </label>
-            <button type="submit">Entrar</button>
+                    <button type="submit" class="btn-primary">Entrar</button>
             <p class="error" id="login-error"></p>
         </form>
+            </div>
     </div>
 
     <div id="admin-section" class="hidden">
-        <button id="logout-btn" style="float:right; margin-bottom: 10px;">Cerrar sesión</button>
+            <div class="card">
+                <button id="logout-btn" class="btn-logout">Cerrar Sesión</button>
+                <h2 id="form-title">➕ Agregar Producto</h2>
 
         <form id="product-form">
-            <h2 id="form-title">Agregar producto</h2>
             <input type="hidden" id="product-id" />
-            <label>Nombre:
-                <input type="text" id="product-name" required />
+                    <label>Nombre del Producto:
+                        <input type="text" id="product-name" required placeholder="Ej: Pizza Margherita" />
             </label>
             <label>Descripción:
-                <textarea id="product-description" rows="3" required></textarea>
+                        <textarea id="product-description" rows="3" required placeholder="Describe tu producto..."></textarea>
             </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <label>Precio:
-                <input type="number" step="0.01" id="product-price" required />
+                            <input type="number" step="0.01" id="product-price" required placeholder="0.00" />
+                        </label>
+                        <label>Categoría:
+                            <input type="text" id="product-category" required placeholder="Ej: Entradas, Platos, Postres" />
             </label>
+                    </div>
             <label>Imagen:
                 <input type="file" id="product-image" accept="image/*" />
             </label>
-            <label>Categoría:
-                <input type="text" id="product-category" required />
+                    <label>Etiquetas (separadas por comas):
+                        <input type="text" id="product-tags" placeholder="Ej: Nuevo, Popular, Vegano, Sin Gluten" />
+                        <small style="color: #666; font-size: 0.9em;">Etiquetas disponibles: Nuevo, Popular, Vegano, Sin Gluten, Picante, Recomendado</small>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="product-available" checked style="width: auto;" />
+                        <span>Producto disponible</span>
             </label>
-            <button type="submit">Guardar</button>
+                    <button type="submit" class="btn-primary">💾 Guardar Producto</button>
             <p class="error" id="product-error"></p>
         </form>
+            </div>
 
-        <div class="product-list" id="product-list">
-            <h2>Productos</h2>
-            <div id="products-container"></div>
+            <div class="card">
+                <h2>📋 Mis Productos</h2>
+                <div id="products-container" class="product-grid"></div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 Enlace de tu Menú</h2>
+                <div id="menu-link-container" style="padding: 20px; background: #f8f9fa; border-radius: 8px; margin-top: 15px;">
+                    <p style="margin-bottom: 10px; color: #666;">Comparte este enlace con tus clientes:</p>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="menu-link" readonly style="flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; font-family: monospace;" />
+                        <button onclick="copyMenuLink()" class="btn-secondary" style="padding: 10px 20px;">📋 Copiar</button>
+                    </div>
+                    <p id="copy-message" style="margin-top: 10px; color: #27ae60; display: none;">✓ Enlace copiado al portapapeles</p>
+                    
+                    <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                        <h3 style="margin-bottom: 15px; color: #555;">📱 Código QR para Imprimir</h3>
+                        <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">Escanea este código para acceder al menú. Perfecto para poner en las mesas.</p>
+                        <div id="qr-container" style="background: white; padding: 20px; border-radius: 8px; display: inline-block; margin-bottom: 15px;">
+                            <canvas id="qr-canvas" style="display: none;"></canvas>
+                            <div id="qr-placeholder" style="width: 200px; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                <div style="text-align: center; color: #999;">
+                                    <div style="font-size: 2em; margin-bottom: 10px;">📱</div>
+                                    <div>Cargando QR...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button onclick="downloadQR()" class="btn-primary" style="padding: 10px 20px;">⬇️ Descargar QR</button>
+                            <button onclick="printQR()" class="btn-secondary" style="padding: 10px 20px; margin-left: 10px;">🖨️ Imprimir QR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🎨 Personalizar Menú</h2>
+                <form id="preferences-form">
+                    <h3 style="margin-top: 0; color: #555; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">Información Básica</h3>
+                    
+                    <label>Nombre del Restaurante:
+                        <input type="text" id="restaurant-name" placeholder="Ej: La Buena Mesa" />
+                    </label>
+                    <label>Logo (opcional):
+                        <input type="file" id="restaurant-logo" accept="image/*" />
+                        <div id="logo-preview" style="margin-top: 10px;"></div>
+                    </label>
+                    <label>Descripción del Restaurante:
+                        <textarea id="restaurant-description" rows="3" placeholder="Describe tu restaurante, especialidades, historia..."></textarea>
+                    </label>
+                    <label>Mensaje de Bienvenida:
+                        <textarea id="welcome-message" rows="2" placeholder="Ej: ¡Bienvenidos! Disfruten de nuestros platos caseros..."></textarea>
+                    </label>
+                    
+                    <h3 style="margin-top: 20px; color: #555; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">Información de Contacto</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <label>Teléfono:
+                            <input type="tel" id="restaurant-phone" placeholder="Ej: +54 11 1234-5678" />
+                        </label>
+                        <label>Dirección:
+                            <input type="text" id="restaurant-address" placeholder="Ej: Av. Corrientes 1234" />
+                        </label>
+                    </div>
+                    
+                    <label>Horarios de Atención:
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+                            <input type="text" id="hours-monday" placeholder="Lunes: 12:00 - 23:00" />
+                            <input type="text" id="hours-tuesday" placeholder="Martes: 12:00 - 23:00" />
+                            <input type="text" id="hours-wednesday" placeholder="Miércoles: 12:00 - 23:00" />
+                            <input type="text" id="hours-thursday" placeholder="Jueves: 12:00 - 23:00" />
+                            <input type="text" id="hours-friday" placeholder="Viernes: 12:00 - 00:00" />
+                            <input type="text" id="hours-saturday" placeholder="Sábado: 12:00 - 00:00" />
+                            <input type="text" id="hours-sunday" placeholder="Domingo: 12:00 - 23:00" />
+                        </div>
+                    </label>
+                    
+                    <h3 style="margin-top: 20px; color: #555; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">Redes Sociales</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                        <label>WhatsApp (número completo con código de país):
+                            <input type="text" id="restaurant-whatsapp" placeholder="Ej: 5491112345678" />
+                        </label>
+                        <label>Instagram:
+                            <input type="text" id="restaurant-instagram" placeholder="Ej: @turestaurante" />
+                        </label>
+                        <label>Facebook:
+                            <input type="text" id="restaurant-facebook" placeholder="Ej: turestaurante" />
+                        </label>
+                    </div>
+                    
+                    <h3 style="margin-top: 20px; color: #555; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px;">Colores del Tema</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <label>Color Inicio Gradiente:
+                            <input type="color" id="color-gradient-start" value="#667eea" />
+                        </label>
+                        <label>Color Fin Gradiente:
+                            <input type="color" id="color-gradient-end" value="#764ba2" />
+                        </label>
+                        <label>Color de Texto:
+                            <input type="color" id="color-text" value="#ffffff" />
+                        </label>
+                        <label>Color de Acento:
+                            <input type="color" id="color-accent" value="#27ae60" />
+                        </label>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>Vista Previa:</strong>
+                        <div id="theme-preview" style="margin-top: 10px; padding: 20px; border-radius: 8px; text-align: center; color: white;">
+                            <div style="font-size: 1.5em; margin-bottom: 10px;">Nombre del Restaurante</div>
+                            <div style="background: white; color: #333; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                                <div style="color: #27ae60; font-weight: bold; font-size: 1.2em;">$25.00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="margin-top: 20px;">💾 Guardar Personalización</button>
+                    <p class="error" id="preferences-error"></p>
+                </form>
+            </div>
+
+            <!-- Panel de Administración (solo para admins) -->
+            <div id="admin-panel" class="card hidden" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white;">
+                <h2 style="color: white; border-bottom: 2px solid rgba(255,255,255,0.3); padding-bottom: 15px;">👑 Administración de Usuarios</h2>
+                
+                <div style="background: white; color: #333; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: #333;">Usuarios Registrados</h3>
+                        <button onclick="showAddUserModal()" class="btn-primary" style="background: #28a745;">➕ Agregar Usuario</button>
+                    </div>
+                    
+                    <div id="users-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
+                                    <th style="padding: 12px; text-align: left;">Email</th>
+                                    <th style="padding: 12px; text-align: left;">Restaurante</th>
+                                    <th style="padding: 12px; text-align: left;">Fecha Alta</th>
+                                    <th style="padding: 12px; text-align: left;">Último Pago</th>
+                                    <th style="padding: 12px; text-align: left;">Vence</th>
+                                    <th style="padding: 12px; text-align: center;">Estado</th>
+                                    <th style="padding: 12px; text-align: center;">Admin</th>
+                                    <th style="padding: 12px; text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <tr>
+                                    <td colspan="8" style="padding: 20px; text-align: center; color: #999;">Cargando usuarios...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar/editar usuario -->
+    <div id="user-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="user-modal-title">Agregar Usuario</h2>
+                <button onclick="closeUserModal()" style="background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2em;">×</button>
+            </div>
+            <form id="user-form">
+                <input type="hidden" id="user-edit-id" />
+                <label>Email:
+                    <input type="email" id="user-email" required />
+                </label>
+                <label>Contraseña:
+                    <input type="password" id="user-password" />
+                    <small style="color: #666;">Dejar vacío para mantener la actual (solo al editar)</small>
+                </label>
+                <label>Nombre del Restaurante:
+                    <input type="text" id="user-restaurant-name" />
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="user-is-admin" style="width: auto;" />
+                    <span>Es Administrador</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="user-subscription-active" checked style="width: auto;" />
+                    <span>Suscripción Activa</span>
+                </label>
+                <label>Fecha de Inicio de Suscripción:
+                    <input type="date" id="user-subscription-start" />
+                </label>
+                <label>Fecha de Vencimiento:
+                    <input type="date" id="user-subscription-end" />
+                </label>
+                <label>Última Fecha de Pago:
+                    <input type="date" id="user-last-payment" />
+                </label>
+                <button type="submit" class="btn-primary" style="margin-top: 20px;">💾 Guardar Usuario</button>
+                <button type="button" onclick="closeUserModal()" class="btn-secondary" style="margin-top: 10px;">Cancelar</button>
+                <p class="error" id="user-form-error"></p>
+            </form>
         </div>
     </div>
 
     <script>
-        // Detectar automáticamente la URL base según el entorno
-        const apiBase = window.location.origin.includes('localhost') 
-            ? 'http://localhost:3001/api' 
-            : window.location.origin + '/api';
+        const apiBase = 'http://localhost:3001/api';
 
         const loginSection = document.getElementById('login-section');
         const adminSection = document.getElementById('admin-section');
@@ -172,7 +520,24 @@
         let token = localStorage.getItem('token');
 
         function setAuthHeader(headers = {}) {
-            if (token) headers['Authorization'] = 'Bearer ' + token;
+            // Leer el token directamente de localStorage cada vez para asegurar que esté actualizado
+            const currentToken = localStorage.getItem('token') || token;
+            if (currentToken) {
+                headers['Authorization'] = 'Bearer ' + currentToken;
+                token = currentToken; // Actualizar la variable global también
+                console.log('✅ Token enviado en header:', currentToken.substring(0, 20) + '...');
+            } else {
+                console.warn('⚠️ No hay token en localStorage ni en variable global');
+                console.warn('⚠️ localStorage.getItem("token"):', localStorage.getItem('token'));
+                console.warn('⚠️ Variable token:', token);
+                // Intentar recargar desde localStorage una vez más
+                const retryToken = localStorage.getItem('token');
+                if (retryToken) {
+                    headers['Authorization'] = 'Bearer ' + retryToken;
+                    token = retryToken;
+                    console.log('✅ Token recuperado en segundo intento');
+                }
+            }
             return headers;
         }
 
@@ -183,17 +548,42 @@
         }
 
         function showAdmin() {
+            // Verificar que haya token antes de mostrar el panel
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) {
+                console.warn('⚠️ Intento de mostrar admin sin token, redirigiendo a login');
+                showLogin();
+                return;
+            }
+            
+            token = currentToken;
             loginSection.classList.add('hidden');
             adminSection.classList.remove('hidden');
             productError.textContent = '';
             loadProducts();
+            loadUserPreferences();
         }
 
-        // Check token on load
-        if (token) {
-            showAdmin();
+        // Asegurar que los elementos estén en el estado correcto al inicio
+        // Forzar que el login se muestre y el admin se oculte si no hay token
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            token = storedToken;
+            console.log('✅ Token encontrado al cargar página:', token.substring(0, 20) + '...');
+            // Verificar que los elementos existan antes de llamar a showAdmin
+            if (loginSection && adminSection) {
+                showAdmin();
+            }
         } else {
-            showLogin();
+            console.log('ℹ️ No hay token almacenado, mostrando login');
+            token = null;
+            // Forzar que el login se muestre y el admin se oculte
+            if (loginSection && adminSection) {
+                loginSection.classList.remove('hidden');
+                adminSection.classList.add('hidden');
+            } else {
+                console.error('❌ No se encontraron los elementos login-section o admin-section');
+            }
         }
 
         loginForm.addEventListener('submit', async (e) => {
@@ -216,9 +606,34 @@
                     return;
                 }
 
+                if (!data.token) {
+                    loginError.textContent = 'Error: No se recibió token del servidor';
+                    console.error('❌ No hay token en la respuesta:', data);
+                    return;
+                }
+                
                 token = data.token;
                 localStorage.setItem('token', token);
+                console.log('✅ Token guardado después del login:', token ? token.substring(0, 20) + '...' : 'null');
+                console.log('✅ Verificando token en localStorage:', localStorage.getItem('token') ? 'Token encontrado' : 'Token NO encontrado');
+                
+                if (data.user && data.user.id) {
+                    localStorage.setItem('userId', data.user.id);
+                }
+                
+                // Actualizar la variable global token
+                token = localStorage.getItem('token');
+                
+                // Verificar nuevamente antes de mostrar admin
+                if (!token) {
+                    loginError.textContent = 'Error: No se pudo guardar el token. Intenta nuevamente.';
+                    console.error('❌ Token no se guardó correctamente');
+                    return;
+                }
+                
                 showAdmin();
+                // Cargar preferencias del usuario para verificar si es admin
+                await loadUserPreferences();
             } catch (err) {
                 loginError.textContent = 'Error en la conexión';
             }
@@ -235,14 +650,24 @@
             productError.textContent = '';
 
             const id = productIdInput.value;
-
-            const fileInput = document.getElementById('product-image'); // Asegurate que el input exista en el HTML
+            const fileInput = document.getElementById('product-image');
 
             const formData = new FormData();
             formData.append('name', productNameInput.value.trim());
             formData.append('description', productDescInput.value.trim());
             formData.append('price', parseFloat(productPriceInput.value));
             formData.append('category', productCategoryInput.value.trim());
+            
+            // Etiquetas
+            const tagsInput = document.getElementById('product-tags');
+            if (tagsInput && tagsInput.value.trim()) {
+                const tags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
+                formData.append('tags', JSON.stringify(tags));
+            }
+            
+            // Disponibilidad
+            const availableInput = document.getElementById('product-available');
+            formData.append('available', availableInput ? availableInput.checked : true);
 
             if (fileInput.files[0]) {
                 formData.append('image', fileInput.files[0]);
@@ -251,17 +676,15 @@
             try {
                 let res;
                 if (id) {
-                    // Update
                     res = await fetch(apiBase + '/products/' + id, {
                         method: 'PUT',
-                        headers: setAuthHeader(), // NO Content-Type
+                        headers: setAuthHeader(),
                         body: formData
                     });
                 } else {
-                    // Create
                     res = await fetch(apiBase + '/products', {
                         method: 'POST',
-                        headers: setAuthHeader(), // NO Content-Type
+                        headers: setAuthHeader(),
                         body: formData
                     });
                 }
@@ -274,11 +697,17 @@
 
                 resetForm();
                 loadProducts();
+                productError.textContent = '';
+                productError.className = 'success';
+                productError.textContent = id ? 'Producto actualizado correctamente' : 'Producto creado correctamente';
+                setTimeout(() => {
+                    productError.textContent = '';
+                    productError.className = 'error';
+                }, 3000);
             } catch (err) {
                 productError.textContent = 'Error en la conexión';
             }
         });
-
 
         function resetForm() {
             productIdInput.value = '';
@@ -286,12 +715,17 @@
             productDescInput.value = '';
             productPriceInput.value = '';
             productCategoryInput.value = '';
-            formTitle.textContent = 'Agregar producto';
+            document.getElementById('product-image').value = '';
+            const tagsInput = document.getElementById('product-tags');
+            if (tagsInput) tagsInput.value = '';
+            const availableInput = document.getElementById('product-available');
+            if (availableInput) availableInput.checked = true;
+            formTitle.textContent = '➕ Agregar Producto';
             productError.textContent = '';
         }
 
         async function loadProducts() {
-            productsContainer.innerHTML = 'Cargando...';
+            productsContainer.innerHTML = '<div class="empty-state">Cargando productos...</div>';
 
             try {
                 const res = await fetch(apiBase + '/products', {
@@ -300,38 +734,65 @@
                 const products = await res.json();
 
                 if (!res.ok) {
-                    productsContainer.textContent = 'Error al cargar productos';
+                    productsContainer.innerHTML = '<div class="error">Error al cargar productos</div>';
                     return;
                 }
 
                 if (products.length === 0) {
-                    productsContainer.textContent = 'No hay productos cargados';
+                    productsContainer.innerHTML = '<div class="empty-state">No hay productos cargados. ¡Agrega tu primer producto!</div>';
                     return;
                 }
 
                 productsContainer.innerHTML = '';
 
                 products.forEach(product => {
-                    const div = document.createElement('div');
-                    div.className = 'product-item';
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
 
-                    div.innerHTML = `
-  <div class="product-info">
-    <strong>${product.name}</strong> - ${product.category} - $${product.price.toFixed(2)}<br/>
-    <small>${product.description}</small><br/>
-    ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}" style="max-width: 150px; margin-top: 8px;" />` : ''}
-  </div>
+                    // Procesar etiquetas
+                    let tagsHtml = '';
+                    if (product.tags) {
+                        try {
+                            const tags = typeof product.tags === 'string' ? JSON.parse(product.tags) : product.tags;
+                            if (Array.isArray(tags) && tags.length > 0) {
+                                tagsHtml = '<div style="margin: 8px 0; display: flex; flex-wrap: wrap; gap: 5px;">';
+                                tags.forEach(tag => {
+                                    const tagColors = {
+                                        'Nuevo': '#28a745',
+                                        'Popular': '#ffc107',
+                                        'Vegano': '#20c997',
+                                        'Sin Gluten': '#17a2b8',
+                                        'Picante': '#dc3545',
+                                        'Recomendado': '#6f42c1'
+                                    };
+                                    const color = tagColors[tag] || '#667eea';
+                                    tagsHtml += `<span style="background: ${color}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75em; font-weight: bold;">${tag}</span>`;
+                                });
+                                tagsHtml += '</div>';
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    const availableBadge = product.available === false 
+                        ? '<span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75em; margin-left: 10px;">Agotado</span>'
+                        : '';
+                    
+                    card.innerHTML = `
+                        ${product.imageUrl ? `<img src="http://localhost:3001/${product.imageUrl}" alt="${product.name}" class="product-image" />` : '<div class="product-image" style="background: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #999;">Sin imagen</div>'}
+                        <div class="product-name">${product.name}${availableBadge}</div>
+                        <span class="product-category">${product.category}</span>
+                        ${tagsHtml}
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div class="product-description">${product.description}</div>
   <div class="product-actions">
-    <button class="edit" data-id="${product.id}">Editar</button>
-    <button class="delete" data-id="${product.id}">Borrar</button>
+                            <button class="btn-secondary edit" data-id="${product.id}">✏️ Editar</button>
+                            <button class="btn-danger delete" data-id="${product.id}">🗑️ Eliminar</button>
   </div>
 `;
 
-
-                    productsContainer.appendChild(div);
+                    productsContainer.appendChild(card);
                 });
 
-                // Add event listeners for edit and delete
                 document.querySelectorAll('.edit').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const id = btn.getAttribute('data-id');
@@ -346,7 +807,7 @@
                 });
 
             } catch (err) {
-                productsContainer.textContent = 'Error en la conexión';
+                productsContainer.innerHTML = '<div class="error">Error en la conexión</div>';
             }
         }
 
@@ -374,14 +835,17 @@
                 productDescInput.value = product.description;
                 productPriceInput.value = product.price;
                 productCategoryInput.value = product.category;
-                formTitle.textContent = 'Editar producto';
+                formTitle.textContent = '✏️ Editar Producto';
+                
+                // Scroll al formulario
+                document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
             } catch (err) {
                 productError.textContent = 'Error en la conexión';
             }
         }
 
         async function deleteProduct(id) {
-            if (!confirm('¿Querés borrar este producto?')) return;
+            if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return;
             productError.textContent = '';
             try {
                 const res = await fetch(apiBase + '/products/' + id, {
@@ -398,6 +862,708 @@
                 productError.textContent = 'Error en la conexión';
             }
         }
+
+        // Función para generar slug desde nombre
+        function generateRestaurantSlug(name) {
+            return name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+                .replace(/[^a-z0-9]+/g, '-') // Reemplazar caracteres especiales con guiones
+                .replace(/^-+|-+$/g, ''); // Eliminar guiones al inicio/final
+        }
+
+        // Actualizar link del menú y generar QR
+        function updateMenuLink(restaurantName, userId) {
+            const menuLinkInput = document.getElementById('menu-link');
+            let menuUrl = '';
+            
+            if (menuLinkInput) {
+                if (restaurantName) {
+                    const restaurantSlug = generateRestaurantSlug(restaurantName);
+                    menuUrl = `http://localhost:3001/menu.html?restaurant=${restaurantSlug}`;
+                    menuLinkInput.value = menuUrl;
+                } else if (userId) {
+                    menuUrl = `http://localhost:3001/menu.html?user=${userId}`;
+                    menuLinkInput.value = menuUrl;
+                } else {
+                    menuLinkInput.value = 'Configura el nombre de tu restaurante para obtener el enlace';
+                    return;
+                }
+                
+                // Generar QR code
+                if (menuUrl) {
+                    generateQRCode(menuUrl);
+                }
+            }
+        }
+        
+        // Generar QR code usando API pública
+        function generateQRCode(url) {
+            const placeholder = document.getElementById('qr-placeholder');
+            
+            if (!placeholder) return;
+            
+            // Limpiar contenido anterior
+            placeholder.innerHTML = '<div style="text-align: center; color: #999;">Generando QR...</div>';
+            
+            // Usar API pública de QR code (más confiable que CDN)
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data=${encodeURIComponent(url)}`;
+            
+            const img = document.createElement('img');
+            img.id = 'qr-canvas';
+            img.src = qrUrl;
+            img.alt = 'QR Code';
+            img.style.width = '200px';
+            img.style.height = '200px';
+            img.style.display = 'block';
+            img.style.borderRadius = '8px';
+            
+            img.onload = function() {
+                placeholder.innerHTML = '';
+                placeholder.appendChild(img);
+            };
+            
+            img.onerror = function() {
+                placeholder.innerHTML = '<div style="text-align: center; color: #e74c3c; padding: 20px;">Error al generar QR. Intenta recargar la página.</div>';
+            };
+        }
+        
+        // Descargar QR como imagen
+        function downloadQR() {
+            const qrElement = document.getElementById('qr-canvas');
+            if (!qrElement) return;
+            
+            const link = document.createElement('a');
+            link.download = 'menu-qr.png';
+            
+            // Si es un canvas, usar toDataURL
+            if (qrElement.tagName === 'CANVAS') {
+                link.href = qrElement.toDataURL();
+            } else if (qrElement.tagName === 'IMG') {
+                // Si es una imagen, usar su src
+                link.href = qrElement.src;
+            } else {
+                return;
+            }
+            
+            link.click();
+        }
+        
+        // Imprimir QR
+        function printQR() {
+            const qrElement = document.getElementById('qr-canvas');
+            if (!qrElement) return;
+            
+            let qrImageSrc = '';
+            if (qrElement.tagName === 'CANVAS') {
+                qrImageSrc = qrElement.toDataURL();
+            } else if (qrElement.tagName === 'IMG') {
+                qrImageSrc = qrElement.src;
+            } else {
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Imprimir QR - Menú</title>
+                        <style>
+                            body {
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                margin: 0;
+                                font-family: Arial, sans-serif;
+                            }
+                            .qr-container {
+                                text-align: center;
+                            }
+                            .qr-container img {
+                                max-width: 300px;
+                                border: 2px solid #000;
+                            }
+                            @media print {
+                                body { margin: 0; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="qr-container">
+                            <h2>Escanea para ver el menú</h2>
+                            <img src="${qrImageSrc}" alt="QR Code" />
+                            <p>Escanea este código con tu teléfono</p>
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+
+        // Copiar link al portapapeles
+        function copyMenuLink() {
+            const menuLinkInput = document.getElementById('menu-link');
+            const copyMessage = document.getElementById('copy-message');
+            
+            if (menuLinkInput && menuLinkInput.value) {
+                menuLinkInput.select();
+                document.execCommand('copy');
+                
+                if (copyMessage) {
+                    copyMessage.style.display = 'block';
+                    setTimeout(() => {
+                        copyMessage.style.display = 'none';
+                    }, 2000);
+                }
+            }
+        }
+
+        // Funciones de personalización
+        async function loadUserPreferences() {
+            try {
+                const res = await fetch(apiBase + '/user/me', {
+                    headers: setAuthHeader()
+                });
+                
+                if (!res.ok) {
+                    const errorData = await res.text();
+                    console.error('Error en respuesta:', errorData);
+                    return;
+                }
+                
+                const user = await res.json();
+
+                if (user) {
+                    // Verificar si es admin y mostrar panel de administración
+                    if (user.isAdmin) {
+                        const adminPanel = document.getElementById('admin-panel');
+                        if (adminPanel) {
+                            adminPanel.classList.remove('hidden');
+                            loadUsers();
+                        }
+                    } else {
+                        const adminPanel = document.getElementById('admin-panel');
+                        if (adminPanel) {
+                            adminPanel.classList.add('hidden');
+                        }
+                    }
+                    
+                    // Información básica
+                    document.getElementById('restaurant-name').value = user.restaurantName || '';
+                    document.getElementById('restaurant-description').value = user.description || '';
+                    document.getElementById('welcome-message').value = user.welcomeMessage || '';
+                    
+                    // Contacto
+                    document.getElementById('restaurant-phone').value = user.phone || '';
+                    document.getElementById('restaurant-address').value = user.address || '';
+                    
+                    // Horarios
+                    if (user.hours) {
+                        try {
+                            const hours = typeof user.hours === 'string' ? JSON.parse(user.hours) : user.hours;
+                            if (typeof hours === 'object') {
+                                document.getElementById('hours-monday').value = hours.monday || '';
+                                document.getElementById('hours-tuesday').value = hours.tuesday || '';
+                                document.getElementById('hours-wednesday').value = hours.wednesday || '';
+                                document.getElementById('hours-thursday').value = hours.thursday || '';
+                                document.getElementById('hours-friday').value = hours.friday || '';
+                                document.getElementById('hours-saturday').value = hours.saturday || '';
+                                document.getElementById('hours-sunday').value = hours.sunday || '';
+                            }
+                        } catch (e) {}
+                    }
+                    
+                    // Redes sociales
+                    document.getElementById('restaurant-whatsapp').value = user.whatsapp || '';
+                    document.getElementById('restaurant-instagram').value = user.instagram || '';
+                    document.getElementById('restaurant-facebook').value = user.facebook || '';
+                    
+                    // Guardar userId en localStorage si no está
+                    if (user.id) {
+                        localStorage.setItem('userId', user.id);
+                    }
+                    
+                    // Actualizar link del menú
+                    updateMenuLink(user.restaurantName, user.id);
+                    
+                    if (user.logoUrl) {
+                        const preview = document.getElementById('logo-preview');
+                        preview.innerHTML = `<img src="http://localhost:3001/${user.logoUrl}" alt="Logo" style="max-width: 150px; border-radius: 8px;" />`;
+                    }
+
+                    // Manejar themeColors de forma segura
+                    if (user.themeColors) {
+                        let colors = user.themeColors;
+                        
+                        // Si viene como string, intentar parsearlo
+                        if (typeof colors === 'string') {
+                            try {
+                                colors = JSON.parse(colors);
+                            } catch (e) {
+                                console.error('Error parseando themeColors:', e);
+                                colors = null;
+                            }
+                        }
+                        
+                        if (colors && typeof colors === 'object') {
+                            document.getElementById('color-gradient-start').value = colors.gradientStart || '#667eea';
+                            document.getElementById('color-gradient-end').value = colors.gradientEnd || '#764ba2';
+                            document.getElementById('color-text').value = colors.textColor || '#ffffff';
+                            document.getElementById('color-accent').value = colors.accentColor || '#27ae60';
+                        }
+                    }
+
+                    updateThemePreview();
+                }
+            } catch (err) {
+                console.error('Error al cargar preferencias:', err);
+                // No mostrar error al usuario si es la primera vez que carga
+            }
+        }
+
+        function updateThemePreview() {
+            const gradientStart = document.getElementById('color-gradient-start').value;
+            const gradientEnd = document.getElementById('color-gradient-end').value;
+            const textColor = document.getElementById('color-text').value;
+            const accentColor = document.getElementById('color-accent').value;
+            const restaurantName = document.getElementById('restaurant-name').value || 'Nombre del Restaurante';
+
+            const preview = document.getElementById('theme-preview');
+            preview.style.background = `linear-gradient(135deg, ${gradientStart} 0%, ${gradientEnd} 100%)`;
+            preview.style.color = textColor;
+            preview.querySelector('div').textContent = restaurantName;
+            preview.querySelector('div:last-child div').style.color = accentColor;
+        }
+
+        // Event listeners para actualizar vista previa en tiempo real
+        document.getElementById('color-gradient-start')?.addEventListener('input', updateThemePreview);
+        document.getElementById('color-gradient-end')?.addEventListener('input', updateThemePreview);
+        document.getElementById('color-text')?.addEventListener('input', updateThemePreview);
+        document.getElementById('color-accent')?.addEventListener('input', updateThemePreview);
+        document.getElementById('restaurant-name')?.addEventListener('input', (e) => {
+            updateThemePreview();
+            // Actualizar link del menú en tiempo real
+            const userId = localStorage.getItem('userId') || document.getElementById('restaurant-name').dataset.userId;
+            updateMenuLink(e.target.value, userId);
+        });
+
+        // Manejar envío del formulario de preferencias
+        document.getElementById('preferences-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const preferencesError = document.getElementById('preferences-error');
+            preferencesError.textContent = '';
+
+            const formData = new FormData();
+            formData.append('restaurantName', document.getElementById('restaurant-name').value.trim());
+            formData.append('description', document.getElementById('restaurant-description').value.trim());
+            formData.append('welcomeMessage', document.getElementById('welcome-message').value.trim());
+            formData.append('phone', document.getElementById('restaurant-phone').value.trim());
+            formData.append('address', document.getElementById('restaurant-address').value.trim());
+            
+            // Horarios
+            const hours = {
+                monday: document.getElementById('hours-monday').value.trim(),
+                tuesday: document.getElementById('hours-tuesday').value.trim(),
+                wednesday: document.getElementById('hours-wednesday').value.trim(),
+                thursday: document.getElementById('hours-thursday').value.trim(),
+                friday: document.getElementById('hours-friday').value.trim(),
+                saturday: document.getElementById('hours-saturday').value.trim(),
+                sunday: document.getElementById('hours-sunday').value.trim()
+            };
+            formData.append('hours', JSON.stringify(hours));
+            
+            // Redes sociales
+            formData.append('whatsapp', document.getElementById('restaurant-whatsapp').value.trim());
+            formData.append('instagram', document.getElementById('restaurant-instagram').value.trim());
+            formData.append('facebook', document.getElementById('restaurant-facebook').value.trim());
+            
+            const themeColors = {
+                gradientStart: document.getElementById('color-gradient-start').value,
+                gradientEnd: document.getElementById('color-gradient-end').value,
+                textColor: document.getElementById('color-text').value,
+                accentColor: document.getElementById('color-accent').value,
+                cardBackground: '#ffffff',
+                categoryColor: document.getElementById('color-gradient-start').value
+            };
+            formData.append('themeColors', JSON.stringify(themeColors));
+
+            const logoFile = document.getElementById('restaurant-logo').files[0];
+            if (logoFile) {
+                formData.append('logo', logoFile);
+            }
+
+            try {
+                const res = await fetch(apiBase + '/user/preferences', {
+                    method: 'PUT',
+                    headers: setAuthHeader(),
+                    body: formData
+                });
+
+                // Verificar si la respuesta es JSON antes de parsear
+                let data;
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    console.error('Respuesta no JSON:', text);
+                    preferencesError.textContent = `Error ${res.status}: ${text || 'Error al guardar preferencias'}`;
+                    return;
+                }
+
+                if (!res.ok) {
+                    preferencesError.textContent = data.error || `Error ${res.status}: Error al guardar preferencias`;
+                    return;
+                }
+
+                preferencesError.className = 'success';
+                preferencesError.textContent = 'Preferencias guardadas correctamente';
+                setTimeout(() => {
+                    preferencesError.textContent = '';
+                    preferencesError.className = 'error';
+                }, 3000);
+
+                // Actualizar logo preview si se subió uno
+                if (data.logoUrl) {
+                    const preview = document.getElementById('logo-preview');
+                    preview.innerHTML = `<img src="http://localhost:3001/${data.logoUrl}" alt="Logo" style="max-width: 150px; border-radius: 8px;" />`;
+                }
+                
+                // Actualizar link del menú con el nuevo nombre
+                if (data.restaurantName) {
+                    updateMenuLink(data.restaurantName, data.id);
+                }
+            } catch (err) {
+                preferencesError.textContent = 'Error en la conexión';
+            }
+        });
+
+        // Funciones de administración de usuarios
+        async function loadUsers() {
+            const tbody = document.getElementById('users-table-body');
+            if (!tbody) return;
+            
+            // Verificar que haya token antes de cargar usuarios
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #e74c3c;">Error: No estás autenticado. Por favor, inicia sesión.</td></tr>';
+                return;
+            }
+            
+            try {
+                const res = await fetch(apiBase + '/admin/users', {
+                    headers: setAuthHeader()
+                });
+                
+                if (!res.ok) {
+                    let errorMsg = 'Error al cargar usuarios';
+                    if (res.status === 401) {
+                        errorMsg = 'Error: Tu sesión expiró. Por favor, inicia sesión nuevamente.';
+                        setTimeout(() => {
+                            token = null;
+                            localStorage.removeItem('token');
+                            showLogin();
+                        }, 2000);
+                    } else if (res.status === 403) {
+                        errorMsg = 'Error: No tienes permisos de administrador para ver esta sección.';
+                    }
+                    tbody.innerHTML = `<tr><td colspan="8" style="padding: 20px; text-align: center; color: #e74c3c;">${errorMsg}</td></tr>`;
+                    return;
+                }
+                
+                // Verificar si la respuesta es JSON
+                let users;
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    users = await res.json();
+                } else {
+                    const text = await res.text();
+                    console.error('Respuesta no JSON:', text);
+                    tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #e74c3c;">Error: Respuesta inválida del servidor</td></tr>';
+                    return;
+                }
+                
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #999;">No hay usuarios registrados</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #e0e0e0';
+                    
+                    const createdAt = user.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES') : '-';
+                    const lastPayment = user.lastPaymentDate ? new Date(user.lastPaymentDate).toLocaleDateString('es-ES') : 'Sin pago';
+                    const endDate = user.subscriptionEndDate ? new Date(user.subscriptionEndDate).toLocaleDateString('es-ES') : '-';
+                    
+                    const isExpired = user.subscriptionEndDate && new Date(user.subscriptionEndDate) < new Date();
+                    const statusColor = user.subscriptionActive && !isExpired ? '#28a745' : '#dc3545';
+                    const statusText = user.subscriptionActive && !isExpired ? 'Activa' : 'Inactiva';
+                    
+                    row.innerHTML = `
+                        <td style="padding: 12px;">${user.email}</td>
+                        <td style="padding: 12px;">${user.restaurantName || '-'}</td>
+                        <td style="padding: 12px;">${createdAt}</td>
+                        <td style="padding: 12px;">${lastPayment}</td>
+                        <td style="padding: 12px;">${endDate}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <span style="background: ${statusColor}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85em; font-weight: bold;">${statusText}</span>
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            ${user.isAdmin ? '👑' : '-'}
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button onclick="editUser(${user.id})" class="btn-secondary" style="padding: 6px 12px; font-size: 0.9em; margin-right: 5px;">✏️</button>
+                            <button onclick="registerPayment(${user.id})" class="btn-primary" style="padding: 6px 12px; font-size: 0.9em; margin-right: 5px; background: #28a745;">💰</button>
+                            ${user.id !== parseInt(localStorage.getItem('userId')) ? `<button onclick="deleteUser(${user.id})" class="btn-danger" style="padding: 6px 12px; font-size: 0.9em;">🗑️</button>` : ''}
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Error al cargar usuarios:', err);
+                tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #e74c3c;">Error en la conexión</td></tr>';
+            }
+        }
+        
+        function showAddUserModal() {
+            // Verificar que haya token antes de mostrar el modal
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) {
+                alert('Error: Tu sesión expiró. Por favor, inicia sesión nuevamente.');
+                showLogin();
+                return;
+            }
+            
+            document.getElementById('user-modal-title').textContent = 'Agregar Usuario';
+            document.getElementById('user-form').reset();
+            document.getElementById('user-edit-id').value = '';
+            document.getElementById('user-subscription-active').checked = true;
+            document.getElementById('user-modal').classList.remove('hidden');
+            
+            // Establecer fechas por defecto
+            const today = new Date().toISOString().split('T')[0];
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            const nextMonthStr = nextMonth.toISOString().split('T')[0];
+            
+            document.getElementById('user-subscription-start').value = today;
+            document.getElementById('user-subscription-end').value = nextMonthStr;
+            document.getElementById('user-last-payment').value = today;
+        }
+        
+        async function editUser(userId) {
+            try {
+                const res = await fetch(apiBase + `/admin/users/${userId}`, {
+                    headers: setAuthHeader()
+                });
+                
+                if (!res.ok) {
+                    alert('Error al cargar usuario');
+                    return;
+                }
+                
+                const user = await res.json();
+                
+                document.getElementById('user-modal-title').textContent = 'Editar Usuario';
+                document.getElementById('user-edit-id').value = user.id;
+                document.getElementById('user-email').value = user.email;
+                document.getElementById('user-password').value = '';
+                document.getElementById('user-restaurant-name').value = user.restaurantName || '';
+                document.getElementById('user-is-admin').checked = user.isAdmin || false;
+                document.getElementById('user-subscription-active').checked = user.subscriptionActive !== false;
+                
+                if (user.subscriptionStartDate) {
+                    document.getElementById('user-subscription-start').value = new Date(user.subscriptionStartDate).toISOString().split('T')[0];
+                }
+                if (user.subscriptionEndDate) {
+                    document.getElementById('user-subscription-end').value = new Date(user.subscriptionEndDate).toISOString().split('T')[0];
+                }
+                if (user.lastPaymentDate) {
+                    document.getElementById('user-last-payment').value = new Date(user.lastPaymentDate).toISOString().split('T')[0];
+                }
+                
+                document.getElementById('user-modal').classList.remove('hidden');
+            } catch (err) {
+                console.error('Error al cargar usuario:', err);
+                alert('Error al cargar usuario');
+            }
+        }
+        
+        function closeUserModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+            document.getElementById('user-form').reset();
+            document.getElementById('user-form-error').textContent = '';
+        }
+        
+        async function registerPayment(userId) {
+            if (!confirm('¿Registrar pago de suscripción para este usuario?')) return;
+            
+            try {
+                const res = await fetch(apiBase + `/admin/users/${userId}/payment`, {
+                    method: 'POST',
+                    headers: {
+                        ...setAuthHeader(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentDate: new Date().toISOString(),
+                        subscriptionEndDate: (() => {
+                            const date = new Date();
+                            date.setMonth(date.getMonth() + 1);
+                            return date.toISOString();
+                        })()
+                    })
+                });
+                
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert(data.error || 'Error al registrar pago');
+                    return;
+                }
+                
+                alert('Pago registrado correctamente');
+                loadUsers();
+            } catch (err) {
+                console.error('Error al registrar pago:', err);
+                alert('Error al registrar pago');
+            }
+        }
+        
+        async function deleteUser(userId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) return;
+            
+            try {
+                const res = await fetch(apiBase + `/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: setAuthHeader()
+                });
+                
+                if (!res.ok) {
+                    const data = await res.json();
+                    alert(data.error || 'Error al eliminar usuario');
+                    return;
+                }
+                
+                alert('Usuario eliminado correctamente');
+                loadUsers();
+            } catch (err) {
+                console.error('Error al eliminar usuario:', err);
+                alert('Error al eliminar usuario');
+            }
+        }
+        
+        // Manejar formulario de usuario
+        document.getElementById('user-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Verificar que haya token antes de continuar
+            const currentToken = localStorage.getItem('token');
+            if (!currentToken) {
+                alert('Error: Tu sesión expiró. Por favor, inicia sesión nuevamente.');
+                showLogin();
+                return;
+            }
+            
+            const errorEl = document.getElementById('user-form-error');
+            errorEl.textContent = '';
+            
+            const userId = document.getElementById('user-edit-id').value;
+            const formData = {
+                email: document.getElementById('user-email').value.trim(),
+                password: document.getElementById('user-password').value.trim(),
+                restaurantName: document.getElementById('user-restaurant-name').value.trim() || null,
+                isAdmin: document.getElementById('user-is-admin').checked,
+                subscriptionActive: document.getElementById('user-subscription-active').checked,
+                subscriptionStartDate: document.getElementById('user-subscription-start').value || null,
+                subscriptionEndDate: document.getElementById('user-subscription-end').value || null,
+                lastPaymentDate: document.getElementById('user-last-payment').value || null
+            };
+            
+            // Si no hay contraseña y es edición, no enviarla
+            if (userId && !formData.password) {
+                delete formData.password;
+            }
+            
+            try {
+                let res;
+                if (userId) {
+                    const headers = setAuthHeader({
+                        'Content-Type': 'application/json'
+                    });
+                    console.log('Headers enviados para editar usuario:', headers);
+                    res = await fetch(apiBase + `/admin/users/${userId}`, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify(formData)
+                    });
+                } else {
+                    if (!formData.password) {
+                        errorEl.textContent = 'La contraseña es requerida para nuevos usuarios';
+                        return;
+                    }
+                    const headers = setAuthHeader({
+                        'Content-Type': 'application/json'
+                    });
+                    console.log('Headers enviados para crear usuario:', headers);
+                    res = await fetch(apiBase + '/admin/users', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(formData)
+                    });
+                }
+                
+                // Verificar si la respuesta es JSON
+                let data;
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    console.error('Respuesta no JSON:', text);
+                    if (res.status === 401) {
+                        errorEl.textContent = 'Error: No tienes permisos de administrador o tu sesión expiró. Por favor, inicia sesión nuevamente.';
+                    } else if (res.status === 403) {
+                        errorEl.textContent = 'Error: Acceso denegado. Se requieren permisos de administrador.';
+                    } else {
+                        errorEl.textContent = `Error ${res.status}: ${text || 'Error al guardar usuario'}`;
+                    }
+                    return;
+                }
+                
+                if (!res.ok) {
+                    errorEl.textContent = data.error || `Error ${res.status}: Error al guardar usuario`;
+                    if (res.status === 401) {
+                        errorEl.textContent = 'Error: Tu sesión expiró. Por favor, inicia sesión nuevamente.';
+                        // Redirigir al login
+                        setTimeout(() => {
+                            token = null;
+                            localStorage.removeItem('token');
+                            showLogin();
+                        }, 2000);
+                    } else if (res.status === 403) {
+                        errorEl.textContent = 'Error: No tienes permisos de administrador para realizar esta acción.';
+                    }
+                    return;
+                }
+                
+                closeUserModal();
+                loadUsers();
+                alert(userId ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
+            } catch (err) {
+                console.error('Error al guardar usuario:', err);
+                errorEl.textContent = 'Error en la conexión. Verifica que estés conectado a internet.';
+            }
+        });
     </script>
 </body>
 
