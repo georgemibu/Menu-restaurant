@@ -193,11 +193,11 @@
         
         if (restaurantParam) {
           // Buscar por nombre del restaurante
-          res = await fetch(`http://localhost:3001/restaurant/${restaurantParam}`);
+          res = await fetch(`${window.location.origin}/restaurant/${restaurantParam}`);
           data = await res.json();
           restaurant = data.restaurant;
         } else if (slug) {
-          res = await fetch(`http://localhost:3001/r/${slug}`);
+          res = await fetch(`${window.location.origin}/r/${slug}`);
           data = await res.json();
           restaurant = data.restaurant;
         } else {
@@ -214,7 +214,18 @@
           }
         }
 
-        const products = data.products || data;
+        // Manejar diferentes estructuras de respuesta
+        let products;
+        if (data.products && Array.isArray(data.products)) {
+          products = data.products;
+        } else if (data.menu && Array.isArray(data.menu)) {
+          products = data.menu; // Compatibilidad con ruta /menu/:userId (ya corregida, pero mantener compatibilidad)
+        } else if (Array.isArray(data)) {
+          products = data; // Fallback si viene como array directo
+        } else {
+          console.error('Error: No se encontraron productos en la respuesta:', data);
+          products = [];
+        }
 
         // Aplicar personalización básica del restaurante (antes de crear elementos)
         if (restaurant) {
@@ -225,7 +236,8 @@
           // Logo
           const logoContainer = document.getElementById('logo-container');
           if (restaurant.logoUrl) {
-            logoContainer.innerHTML = `<img src="http://localhost:3001/${restaurant.logoUrl}" alt="${restaurant.restaurantName || 'Logo'}" />`;
+            const logoUrl = restaurant.logoUrl.startsWith('http') ? restaurant.logoUrl : `${window.location.origin}/${restaurant.logoUrl}`;
+            logoContainer.innerHTML = `<img src="${logoUrl}" alt="${restaurant.restaurantName || 'Logo'}" />`;
           } else {
             logoContainer.innerHTML = '';
           }
@@ -381,8 +393,9 @@
               ? '<div style="background: #dc3545; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; text-align: center;">Agotado</div>'
               : '';
 
+            const productImageUrl = p.imageUrl ? (p.imageUrl.startsWith('http') ? p.imageUrl : `${window.location.origin}/${p.imageUrl}`) : null;
             card.innerHTML = `
-              ${p.imageUrl ? `<img src="http://localhost:3001/${p.imageUrl}" alt="${p.name}" class="product-image" />` : '<div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #999; font-size: 3em;">🍽️</div>'}
+              ${productImageUrl ? `<img src="${productImageUrl}" alt="${p.name}" class="product-image" />` : '<div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #999; font-size: 3em;">🍽️</div>'}
               <div class="product-info">
                 <div class="product-name">${p.name}</div>
                 ${unavailableBadge}

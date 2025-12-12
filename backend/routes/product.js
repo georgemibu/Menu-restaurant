@@ -84,7 +84,11 @@ router.get('/public', async (req, res) => {
       });
     }
     
-    res.json(products);
+    // Retornar estructura consistente incluso cuando no hay usuario
+    res.json({
+      restaurant: null,
+      products: products
+    });
   } catch (err) {
     console.error('Error en ruta pública:', err);
     res.status(500).json({ error: 'Error al obtener productos' });
