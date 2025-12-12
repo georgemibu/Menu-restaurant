@@ -29,8 +29,15 @@ app.use('/menu', require('./routes/menu'));
 
 
 // Usar el puerto que Render asigna automáticamente, o 3001 por defecto
-const PORT = process.env.PORT || 3001;
-const HOST = process.env.HOST || '0.0.0.0'; // Escuchar en todas las interfaces para Render
+// Render asigna el puerto automáticamente a través de process.env.PORT
+const PORT = parseInt(process.env.PORT, 10) || 3001;
+const HOST = '0.0.0.0'; // Escuchar en todas las interfaces para Render
+
+// Validar que el puerto sea un número válido
+if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
+  console.error('Error: Puerto inválido:', process.env.PORT);
+  process.exit(1);
+}
 
 // Sincronizar modelos con la base de datos (solo crea tablas si no existen)
 // NO usar { force: true } ni { alter: true } en producción para evitar pérdida de datos
