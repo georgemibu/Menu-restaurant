@@ -8,20 +8,6 @@ const publicRoutes = require('./routes/public');
 const app = express();
 app.use(cors());
 
-// Configurar Content-Security-Policy para permitir recursos propios (incluyendo favicon)
-app.use((req, res, next) => {
-  // Solo aplicar CSP si no es el favicon
-  if (req.path === '/favicon.ico') {
-    return next();
-  }
-  // Para otras rutas, permitir recursos del mismo origen
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' https://api.qrserver.com; style-src 'self' 'unsafe-inline';"
-  );
-  next();
-});
-
 const path = require('path');
 
 // Middlewares para parsing (excepto multipart/form-data que lo maneja multer)
@@ -39,8 +25,22 @@ app.get('/favicon.ico', (req, res) => {
   }
 });
 
+// Servir archivos estáticos ANTES de aplicar CSP
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
+
+// Configurar Content-Security-Policy solo para HTML (después de servir estáticos)
+app.use((req, res, next) => {
+  // Solo aplicar CSP a archivos HTML, no a recursos estáticos
+  if (req.path.endsWith('.html') || req.path === '/' || req.path === '/admin.html' || req.path === '/menu.html') {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.qrserver.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://api.qrserver.com;"
+    );
+  }
+  next();
+});
+
 app.use('/', publicRoutes);
 
 
