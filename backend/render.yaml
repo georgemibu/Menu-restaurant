@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: menu-restaurant
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: SECRET_KEY
+        generateValue: true
+    disk:
+      name: uploads-disk
+      mountPath: /opt/render/project/src/backend/uploads
+      sizeGB: 1
+

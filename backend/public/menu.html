@@ -6,93 +6,416 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Menú del Restaurante</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
-      background: #f8f8f8;
+      transition: background 0.5s ease;
     }
-    h1 {
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
       text-align: center;
+      color: white;
+      margin-bottom: 40px;
+      padding: 30px;
     }
+
+    h1 {
+      font-size: 3em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+      margin-bottom: 10px;
+    }
+
     .category {
-      margin-top: 30px;
+      margin-bottom: 50px;
     }
-    .product {
+
+    .category-title {
       background: white;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .product img {
-      max-width: 100px;
-      height: auto;
-      float: left;
-      margin-right: 10px;
-      border-radius: 4px;
-    }
-    .product-details {
-      overflow: hidden;
-    }
-    .price {
+      padding: 15px 30px;
+      border-radius: 12px 12px 0 0;
+      color: #667eea;
+      font-size: 1.8em;
       font-weight: bold;
-      color: #28a745;
+      margin-bottom: 0;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: color 0.3s ease;
+    }
+    
+    .logo-container {
+      margin-bottom: 20px;
+    }
+    
+    .logo-container img {
+      max-height: 100px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      background: white;
+      padding: 30px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 2px solid #e0e0e0;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background: #e0e0e0;
+    }
+
+    .product-info {
+      padding: 20px;
+    }
+
+    .product-name {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .product-description {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      min-height: 60px;
+    }
+
+    .product-price {
+      font-size: 1.8em;
+      color: #27ae60;
+      font-weight: bold;
+      text-align: right;
+      transition: color 0.3s ease;
+    }
+
+    .loading {
+      text-align: center;
+      color: white;
+      font-size: 1.5em;
+      padding: 50px;
+    }
+
+    .error {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      color: #e74c3c;
+      font-size: 1.2em;
     }
   </style>
 </head>
 <body>
-  <h1 id="restaurant-name">Menú</h1>
-  <div id="menu-container"></div>
+  <div class="container">
+    <header>
+      <div id="logo-container" class="logo-container"></div>
+      <h1 id="restaurant-name">🍽️ Menú del Restaurante</h1>
+      <div id="welcome-message" style="margin-top: 15px; font-size: 1.1em; font-weight: normal;"></div>
+      <div id="restaurant-description" style="margin-top: 15px; font-size: 0.95em; opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+      
+      <div id="restaurant-info" style="margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; font-size: 0.9em;">
+        <div id="contact-info" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        <div id="hours-info" style="text-align: left;"></div>
+      </div>
+      
+      <div id="social-buttons" style="margin-top: 25px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;"></div>
+    </header>
+    <div id="menu-container" class="loading">Cargando menú...</div>
+  </div>
 
   <script>
-    const apiBase = 'http://localhost:3001/api';
+    // Detectar automáticamente la URL base según el entorno
+    const apiBase = window.location.origin.includes('localhost') 
+        ? 'http://localhost:3001/api' 
+        : window.location.origin + '/api';
 
-    // Suponemos que el restaurante se pasa como ?user=1 o ?slug=algo
+    // Función para generar slug desde nombre
+    function generateSlug(name) {
+      return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+        .replace(/[^a-z0-9]+/g, '-') // Reemplazar caracteres especiales con guiones
+        .replace(/^-+|-+$/g, ''); // Eliminar guiones al inicio/final
+    }
+
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('user'); // más adelante podrías usar slug
+    const userId = params.get('user');
+    const slug = params.get('slug');
+    const restaurantParam = params.get('restaurant');
 
     async function loadMenu() {
-      const res = await fetch(`${apiBase}/products?user=${userId}`);
-      const products = await res.json();
+      const container = document.getElementById('menu-container');
+      
+      if (!userId && !slug && !restaurantParam) {
+        container.className = 'error';
+        container.textContent = 'Error: Falta el parámetro ?user=ID, ?slug=SLUG o ?restaurant=NOMBRE';
+        return;
+      }
 
-      if (!Array.isArray(products)) {
-        document.getElementById('menu-container').textContent = 'Error al cargar menú.';
+      try {
+        let res;
+        let data;
+        let restaurant = null;
+        
+        if (restaurantParam) {
+          // Buscar por nombre del restaurante
+          res = await fetch(`http://localhost:3001/restaurant/${restaurantParam}`);
+          data = await res.json();
+          restaurant = data.restaurant;
+        } else if (slug) {
+          res = await fetch(`http://localhost:3001/r/${slug}`);
+          data = await res.json();
+          restaurant = data.restaurant;
+        } else {
+          // Buscar por ID y luego cambiar URL al nombre
+          res = await fetch(`${apiBase}/products/public?user=${userId}`);
+          data = await res.json();
+          restaurant = data.restaurant;
+          
+          // Si tenemos el nombre del restaurante, cambiar la URL
+          if (restaurant && restaurant.restaurantName) {
+            const restaurantSlug = generateSlug(restaurant.restaurantName);
+            const newUrl = `${window.location.pathname}?restaurant=${restaurantSlug}`;
+            window.history.replaceState({}, '', newUrl);
+          }
+        }
+
+        const products = data.products || data;
+
+        // Aplicar personalización básica del restaurante (antes de crear elementos)
+        if (restaurant) {
+          // Nombre del restaurante
+          const restaurantNameEl = document.getElementById('restaurant-name');
+          restaurantNameEl.textContent = restaurant.restaurantName || restaurant.email || '🍽️ Menú del Restaurante';
+          
+          // Logo
+          const logoContainer = document.getElementById('logo-container');
+          if (restaurant.logoUrl) {
+            logoContainer.innerHTML = `<img src="http://localhost:3001/${restaurant.logoUrl}" alt="${restaurant.restaurantName || 'Logo'}" />`;
+          } else {
+            logoContainer.innerHTML = '';
+          }
+
+          // Mensaje de bienvenida
+          const welcomeEl = document.getElementById('welcome-message');
+          if (restaurant.welcomeMessage) {
+            welcomeEl.textContent = restaurant.welcomeMessage;
+            welcomeEl.style.display = 'block';
+          } else {
+            welcomeEl.style.display = 'none';
+          }
+
+          // Descripción
+          const descriptionEl = document.getElementById('restaurant-description');
+          if (restaurant.description) {
+            descriptionEl.textContent = restaurant.description;
+            descriptionEl.style.display = 'block';
+          } else {
+            descriptionEl.style.display = 'none';
+          }
+
+          // Información de contacto
+          const contactInfo = document.getElementById('contact-info');
+          let contactHtml = '';
+          if (restaurant.phone) {
+            contactHtml += `<div>📞 ${restaurant.phone}</div>`;
+          }
+          if (restaurant.address) {
+            contactHtml += `<div>📍 ${restaurant.address}</div>`;
+          }
+          contactInfo.innerHTML = contactHtml || '';
+
+          // Horarios
+          const hoursInfo = document.getElementById('hours-info');
+          if (restaurant.hours && typeof restaurant.hours === 'object') {
+            let hoursHtml = '<div style="font-weight: bold; margin-bottom: 8px;">🕐 Horarios:</div>';
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            days.forEach((day, index) => {
+              if (restaurant.hours[day]) {
+                hoursHtml += `<div style="font-size: 0.9em;">${dayNames[index]}: ${restaurant.hours[day]}</div>`;
+              }
+            });
+            hoursInfo.innerHTML = hoursHtml;
+          } else {
+            hoursInfo.innerHTML = '';
+          }
+
+          // Redes sociales
+          const socialButtons = document.getElementById('social-buttons');
+          let socialHtml = '';
+          if (restaurant.whatsapp) {
+            const whatsappNum = restaurant.whatsapp.replace(/[^0-9]/g, '');
+            socialHtml += `<a href="https://wa.me/${whatsappNum}" target="_blank" style="background: #25D366; color: white; padding: 12px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">📱 WhatsApp</a>`;
+          }
+          if (restaurant.instagram) {
+            const instagramHandle = restaurant.instagram.replace('@', '');
+            socialHtml += `<a href="https://instagram.com/${instagramHandle}" target="_blank" style="background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); color: white; padding: 12px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">📷 Instagram</a>`;
+          }
+          if (restaurant.facebook) {
+            socialHtml += `<a href="https://facebook.com/${restaurant.facebook}" target="_blank" style="background: #1877F2; color: white; padding: 12px 20px; border-radius: 25px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">👥 Facebook</a>`;
+          }
+          socialButtons.innerHTML = socialHtml;
+
+          // Aplicar colores básicos (fondo y header)
+          if (restaurant.themeColors) {
+            const colors = restaurant.themeColors;
+            
+            // Fondo del body
+            document.body.style.background = `linear-gradient(135deg, ${colors.gradientStart || '#667eea'} 0%, ${colors.gradientEnd || '#764ba2'} 100%)`;
+            
+            // Color del texto del header
+            document.querySelector('header').style.color = colors.textColor || '#ffffff';
+          }
+        }
+
+        if (!Array.isArray(products) || products.length === 0) {
+          container.className = 'error';
+          container.textContent = 'No hay productos disponibles en este menú.';
         return;
       }
 
       const grouped = {};
-
       products.forEach(p => {
         if (!grouped[p.category]) grouped[p.category] = [];
         grouped[p.category].push(p);
       });
 
-      const container = document.getElementById('menu-container');
       container.innerHTML = '';
 
       for (const category in grouped) {
         const section = document.createElement('div');
         section.className = 'category';
-        section.innerHTML = `<h2>${category}</h2>`;
+          
+          const title = document.createElement('div');
+          title.className = 'category-title';
+          title.textContent = category;
+          // Aplicar color personalizado si existe
+          if (restaurant && restaurant.themeColors) {
+            title.style.color = restaurant.themeColors.categoryColor || restaurant.themeColors.gradientStart || '#667eea';
+          }
+          section.appendChild(title);
+
+          const grid = document.createElement('div');
+          grid.className = 'products-grid';
         
         grouped[category].forEach(p => {
-          const div = document.createElement('div');
-          div.className = 'product';
+            // Filtrar productos no disponibles si está configurado
+            if (p.available === false) {
+              return; // O puedes mostrar con estilo diferente
+            }
 
-          div.innerHTML = `
-            ${p.imageUrl ? `<img src="${apiBase.replace('/api', '')}/${p.imageUrl}" alt="${p.name}" />` : ''}
-            <div class="product-details">
-              <h3>${p.name}</h3>
-              <p>${p.description}</p>
-              <p class="price">$${p.price.toFixed(2)}</p>
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            if (p.available === false) {
+              card.style.opacity = '0.6';
+            }
+
+            // Procesar etiquetas
+            let tagsHtml = '';
+            if (p.tags) {
+              try {
+                const tags = typeof p.tags === 'string' ? JSON.parse(p.tags) : p.tags;
+                if (Array.isArray(tags) && tags.length > 0) {
+                  tagsHtml = '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0;">';
+                  tags.forEach(tag => {
+                    const tagColors = {
+                      'Nuevo': '#28a745',
+                      'Popular': '#ffc107',
+                      'Vegano': '#20c997',
+                      'Sin Gluten': '#17a2b8',
+                      'Picante': '#dc3545',
+                      'Recomendado': '#6f42c1'
+                    };
+                    const color = tagColors[tag] || '#667eea';
+                    tagsHtml += `<span style="background: ${color}; color: white; padding: 4px 10px; border-radius: 15px; font-size: 0.75em; font-weight: bold;">${tag}</span>`;
+                  });
+                  tagsHtml += '</div>';
+                }
+              } catch (e) {}
+            }
+
+            const priceEl = document.createElement('div');
+            priceEl.className = 'product-price';
+            priceEl.textContent = `$${parseFloat(p.price).toFixed(2)}`;
+            // Aplicar color personalizado si existe
+            if (restaurant && restaurant.themeColors) {
+              priceEl.style.color = restaurant.themeColors.accentColor || '#27ae60';
+            }
+
+            const unavailableBadge = p.available === false 
+              ? '<div style="background: #dc3545; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; text-align: center;">Agotado</div>'
+              : '';
+
+            card.innerHTML = `
+              ${p.imageUrl ? `<img src="http://localhost:3001/${p.imageUrl}" alt="${p.name}" class="product-image" />` : '<div class="product-image" style="display: flex; align-items: center; justify-content: center; color: #999; font-size: 3em;">🍽️</div>'}
+              <div class="product-info">
+                <div class="product-name">${p.name}</div>
+                ${unavailableBadge}
+                ${tagsHtml}
+                <div class="product-description">${p.description || 'Sin descripción'}</div>
             </div>
           `;
 
-          section.appendChild(div);
+            card.querySelector('.product-info').appendChild(priceEl);
+
+            grid.appendChild(card);
         });
 
+          section.appendChild(grid);
         container.appendChild(section);
+        }
+        
+        // Re-aplicar colores después de crear los elementos
+        if (restaurant && restaurant.themeColors) {
+          const colors = restaurant.themeColors;
+          const categoryTitles = document.querySelectorAll('.category-title');
+          categoryTitles.forEach(title => {
+            title.style.color = colors.categoryColor || colors.gradientStart || '#667eea';
+          });
+          
+          const prices = document.querySelectorAll('.product-price');
+          prices.forEach(price => {
+            price.style.color = colors.accentColor || '#27ae60';
+          });
+        }
+      } catch (err) {
+        container.className = 'error';
+        container.textContent = 'Error al cargar el menú. Por favor, intenta más tarde.';
+        console.error(err);
       }
     }
 

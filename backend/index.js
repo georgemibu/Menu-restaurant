@@ -7,9 +7,12 @@ const publicRoutes = require('./routes/public');
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 
 const path = require('path');
+
+// Middlewares para parsing (excepto multipart/form-data que lo maneja multer)
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
@@ -17,16 +20,24 @@ app.use('/', publicRoutes);
 
 
 
-// Rutas (las agregaremos luego)
+// Rutas API
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/product'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/menu', require('./routes/menu'));
 
 
+// Usar el puerto que Render asigna automáticamente, o 3001 por defecto
 const PORT = process.env.PORT || 3001;
 
+// Sincronizar modelos con la base de datos (solo crea tablas si no existen)
+// NO usar { force: true } ni { alter: true } en producción para evitar pérdida de datos
 sequelize.sync().then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
   });
+}).catch(err => {
+  console.error('Error al sincronizar la base de datos:', err);
+  process.exit(1);
 });

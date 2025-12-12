@@ -148,7 +148,10 @@
     </div>
 
     <script>
-        const apiBase = 'http://localhost:3001/api';
+        // Detectar automáticamente la URL base según el entorno
+        const apiBase = window.location.origin.includes('localhost') 
+            ? 'http://localhost:3001/api' 
+            : window.location.origin + '/api';
 
         const loginSection = document.getElementById('login-section');
         const adminSection = document.getElementById('admin-section');

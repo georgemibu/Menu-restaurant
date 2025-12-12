@@ -12,6 +12,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING, // o DataTypes.TEXT
             allowNull: true,
         },
+        tags: {
+            type: DataTypes.STRING, // JSON como string: ["Nuevo", "Popular", "Vegano"]
+            allowNull: true,
+        },
+        available: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+        },
     });
 
     Product.associate = function (models) {
