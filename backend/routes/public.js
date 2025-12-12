@@ -58,22 +58,9 @@ router.get('/r/:slug', async (req, res) => {
 router.get('/restaurant/:restaurantSlug', async (req, res) => {
   try {
     const restaurantSlug = req.params.restaurantSlug;
-    const { Op } = require('sequelize');
     
-    // Buscar usuarios que tengan restaurantName (más eficiente que cargar todos)
-    const users = await User.findAll({
-      where: {
-        restaurantName: {
-          [Op.ne]: null
-        }
-      },
-      attributes: ['id', 'email', 'restaurantName', 'logoUrl', 'themeColors', 
-                   'description', 'welcomeMessage', 'phone', 'address', 'hours',
-                   'whatsapp', 'instagram', 'facebook']
-    });
-    
-    // Filtrar por slug generado (ya que no podemos hacer el slug directamente en SQL)
-    // Esto es más eficiente que cargar TODOS los usuarios sin filtro
+    // Buscar usuario por nombre del restaurante (comparando slugs)
+    const users = await User.findAll();
     const user = users.find(u => {
       if (!u.restaurantName) return false;
       const userSlug = generateRestaurantSlug(u.restaurantName);

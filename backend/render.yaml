@@ -7,6 +7,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3001
       - key: SECRET_KEY
         generateValue: true
+    disk:
+      name: uploads-disk
+      mountPath: /opt/render/project/src/backend/uploads
+      sizeGB: 1
 

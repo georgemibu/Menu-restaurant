@@ -52,7 +52,7 @@ router.get('/:userId', async (req, res) => {
         instagram: user.instagram,
         facebook: user.facebook
       },
-      products: products
+      menu: products
     });
   } catch (err) {
     console.error('Error al cargar el menú:', err);
