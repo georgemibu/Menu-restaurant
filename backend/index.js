@@ -14,9 +14,15 @@ const path = require('path');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Ruta para favicon (evitar error 404)
+// Ruta para favicon (servir archivo si existe, sino responder 204)
 app.get('/favicon.ico', (req, res) => {
-  res.status(204).end(); // No Content - el navegador no mostrará error
+  const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+  const fs = require('fs');
+  if (fs.existsSync(faviconPath)) {
+    res.sendFile(faviconPath);
+  } else {
+    res.status(204).end(); // No Content - el navegador no mostrará error
+  }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
