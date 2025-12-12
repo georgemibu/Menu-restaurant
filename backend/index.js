@@ -29,11 +29,18 @@ app.get('/favicon.ico', (req, res) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
 
-// NO aplicar CSP restrictivo - Render ya tiene su propia configuración
-// Solo remover headers CSP restrictivos que puedan estar interfiriendo
+// Configurar headers permisivos SOLO para archivos HTML
 app.use((req, res, next) => {
-  // Remover cualquier CSP restrictivo que Render pueda estar agregando
-  res.removeHeader('Content-Security-Policy');
+  // Solo aplicar CSP a archivos HTML, no a recursos estáticos
+  if (req.path.endsWith('.html') || req.path === '/' || req.path === '/admin.html' || req.path === '/menu.html') {
+    // Establecer CSP muy permisivo que sobrescriba cualquier CSP de Render
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; img-src * data: blob: 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; font-src * data:; connect-src *; frame-ancestors *;"
+    );
+    // Remover headers restrictivos que puedan interferir
+    res.removeHeader('X-Content-Type-Options');
+  }
   next();
 });
 
