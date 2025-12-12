@@ -14,6 +14,11 @@ const path = require('path');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Ruta para favicon (evitar error 404)
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end(); // No Content - el navegador no mostrará error
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
 app.use('/', publicRoutes);
